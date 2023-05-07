@@ -51,5 +51,32 @@ def predict_log(dict_pred):
         result = 'Excellent'
 
     return result
+
+@app.route('/predict',methods=['POST'])
+def predict():
+    with open("scaler.pkl", 'rb') as f:
+        scalar = pickle.load(f)
+
+    with open("mymodel.pkl", 'rb') as f:
+        model = pickle.load(f)
+    data=[float(x) for x in request.form.values()]
+    final_input= scalar.transform(np.array(data).reshape(1,-1))
+    print(final_input)
+    output= model.predict(final_input)
+    if output[0] == 3:
+        result = 'Bad'
+    elif output[0] == 4 :
+        result = 'Below Average'
+    elif output[0]==5:
+        result = 'Average'
+    elif output[0] == 6:
+        result = 'Good'
+    elif output[0] == 7:
+        result = 'Very Good'
+    else :
+        result = 'Excellent'
+
+    return render_template("home.html",prediction_text="The quality of wine is {}".format(result))
+
 if __name__ == "__main__":
     app.run(debug=True)
